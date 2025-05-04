@@ -1,4 +1,5 @@
 name: React App CI/CD
+
 on:
   push:
     branches:
@@ -7,21 +8,40 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
+      # Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20.16.0'
+          cache: 'npm' # Cache npm dependencies for faster builds
 
+      # Install dependencies
       - name: Install dependencies
-        run: npm install
+        run: npm ci # Use `npm ci` for clean installs in CI environments
 
+      # Run linting (optional, but recommended)
+      - name: Run ESLint
+        run: npm run lint
+
+      # Build the app
       - name: Build the app
         run: npm run build
-        
+
+      # Build Docker image
+      - name: Build Docker image
+        run: docker build -t my-vite-app .
+
+      # Run Docker container
+      - name: Run Docker container
+        run: docker run -d -p 3000:3000 my-vite-app
+
+      # Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
